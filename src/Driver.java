@@ -7,7 +7,7 @@ public class Driver {
 	private static final int[] DENOMINATION_VALUE = {20, 10, 5, 2, 1};
 	private static final int   DENOMINATION_SIZE  = 5;
 	
-	private static int[] denomination = {0, 0, 0, 0, 0};
+	private static int[] denomination = {0, 0, 0, 0, 0}; 
 	
 	public static void main(String[] args) {
  
@@ -58,13 +58,19 @@ public class Driver {
 	}
 
 	private static void updateDenomination(String[] strArr, boolean add) {
+		boolean valid = true;
 		if(add)
 			 for(int i = 1; i < DENOMINATION_SIZE + 1; i++)
 				 denomination[i - 1] += Integer.parseInt(strArr[i]);
-		else for(int i = 1; i < DENOMINATION_SIZE + 1; i++)
-				denomination[i - 1] -= Integer.parseInt(strArr[i]);
-		 
-		displayDenomination();
+		else 
+			for(int i = 1; i < DENOMINATION_SIZE + 1; i++)
+				if(Integer.parseInt(strArr[i]) > denomination[i - 1]) {
+					valid = false;
+					System.out.println("Sorry, not enough change.");
+					break;
+				} else denomination[i - 1] -= Integer.parseInt(strArr[i]);
+		
+		if(valid) displayDenomination();
 	}
  
 	// Make higher bills more priority
