@@ -67,6 +67,7 @@ public class Driver {
 		displayDenomination();
 	}
  
+	// Make higher bills more priority
 	private static void getChange(String[] strArr) {
 		int[] changeDenomination = new int[DENOMINATION_SIZE];
 		int toChange = Integer.parseInt(strArr[1]);
@@ -76,19 +77,24 @@ public class Driver {
 			System.out.println("Sorry, not enough change.");
 		else {
 			for(int i = 0; i < DENOMINATION_SIZE; i++)
-				while(toChange > DENOMINATION_VALUE[i] && 
+				if(toChange > DENOMINATION_VALUE[i] && 
 						denomination[i] > 0) {
 					int div = toChange / DENOMINATION_VALUE[i];
-					
-					toChange -= DENOMINATION_VALUE[i] * div;
-					denomination[i] -= div;
-					
-					changeDenomination[i] = div;
-				} 
 
-			System.out.println("ToChange: " + toChange);
-			for(int i = 0; i < DENOMINATION_SIZE; i++)
-				System.out.print((i == 0 ? "" : " ") + changeDenomination[i]);
+					if(denomination[i] < div)
+						div = denomination[i];
+					 
+					while(!checkDenominationPathValid(toChange, div, i) && div != 0)
+						div -= 1;
+						
+					if(div != 0) {
+						toChange -= DENOMINATION_VALUE[i] * div;
+						denomination[i] -= div;
+						
+						changeDenomination[i] = div;
+					} 		 
+				} 
+ 
 			if(toChange != 0) 
 				System.out.println("Sorry, not enough change.");
 			else {
@@ -98,6 +104,24 @@ public class Driver {
 			}
 				
 		}
+	}
+
+	// Check bottom-up
+	private static boolean checkDenominationPathValid(int toChange, int div, int ctr) {
+		
+		toChange -= DENOMINATION_VALUE[ctr] * div;
+		
+		if(ctr < DENOMINATION_SIZE)
+			for(int i = DENOMINATION_SIZE - 1; i > ctr; i--)  
+				if(toChange > DENOMINATION_VALUE[i] &&  denomination[i] > 0) {
+					int newDiv = toChange / DENOMINATION_VALUE[i];
+
+					if(denomination[i] < newDiv)
+						newDiv = denomination[i];
+					
+					toChange -= DENOMINATION_VALUE[i] * newDiv;
+				} 
+		return toChange == 0;
 	}
 
 	private static void invalidInput() {
