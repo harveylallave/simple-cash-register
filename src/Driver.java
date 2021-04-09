@@ -83,63 +83,54 @@ public class Driver {
 		return valid;
 	}
  
-	// Make higher bills more priority
-	private static void getChange(String[] strArr) {
-		int[] changeDenomination = new int[DENOMINATION_SIZE];
+	// Higher bills have higher priority
+	private static void getChange(String[] strArr) { 
 		int toChange = Integer.parseInt(strArr[1]);
 		int total = getTotalAmount();
 		
 		if(toChange > total)
 			System.out.println("Sorry, not enough change.");
-		else {
-			for(int i = 0; i < DENOMINATION_SIZE; i++)
-				if(toChange > DENOMINATION_VALUE[i] && 
-						denomination[i] > 0) {
-					int div = toChange / DENOMINATION_VALUE[i];
-
-					if(denomination[i] < div)
-						div = denomination[i];
-					 
-					while(!checkDenominationPathValid(toChange, div, i) && div != 0)
-						div -= 1;
-						
-					if(div != 0) {
-						toChange -= DENOMINATION_VALUE[i] * div;
-						denomination[i] -= div;
-						
-						changeDenomination[i] = div;
-					} 		 
-				} 
- 
-			if(toChange != 0) 
-				System.out.println("Sorry, not enough change.");
-			else {
-				for(int i = 0; i < DENOMINATION_SIZE; i++)
-					System.out.print((i == 0 ? "" : " ") + changeDenomination[i]);
-				System.out.println();
-			}
-				
+		else {  
+			if(checkDenominationPath(toChange, 0, "") != 0)
+				System.out.println("Sorry, not enough change."); 
 		}
 	}
-
-	// Check bottom-up
-	private static boolean checkDenominationPathValid(int toChange, int div, int ctr) {
+  
+	private static int checkDenominationPath(int toChange, int ctr, String path) {
+		 
+		if(toChange == 0) {
+			for(int i = ctr; i < DENOMINATION_SIZE; i++)
+				path += (i == 0 ? "" : " ") + "0"; 
+			
+			System.out.println(path); 
+			updateDenomination(("take " + path).split(" "), false);
+			return 0;
+		} 
 		
-		toChange -= DENOMINATION_VALUE[ctr] * div;
+		else if(ctr >= DENOMINATION_SIZE) 
+			return -1;
 		
-		if(ctr < DENOMINATION_SIZE)
-			for(int i = DENOMINATION_SIZE - 1; i > ctr; i--)  
-				if(toChange > DENOMINATION_VALUE[i] &&  denomination[i] > 0) {
-					int newDiv = toChange / DENOMINATION_VALUE[i];
-
-					if(denomination[i] < newDiv)
-						newDiv = denomination[i];
-					
-					toChange -= DENOMINATION_VALUE[i] * newDiv;
-				} 
-		return toChange == 0;
+		else if(denomination[ctr] > 0 && toChange >= DENOMINATION_VALUE[ctr]) {
+			int newDiv = toChange / DENOMINATION_VALUE[ctr];
+ 
+			if(denomination[ctr] < newDiv)
+				newDiv = denomination[ctr];
+			
+			int newToChange = toChange - DENOMINATION_VALUE[ctr] * newDiv; 
+			do {
+				newToChange = checkDenominationPath(toChange - DENOMINATION_VALUE[ctr] * newDiv, ctr + 1, 
+													path + (path.isEmpty() ? "" : " ") + newDiv);
+				
+					newDiv -= 1;
+				 
+			} while(newDiv != -1 && newToChange != 0);
+ 			
+			return newToChange;
+			 
+		} else return checkDenominationPath(toChange, ctr + 1, 
+											path + (path.isEmpty() ? "" : " ") + "0");
 	}
-
+	 
 	private static void invalidInput() {
 		System.out.println("Please enter a valid input.");
 	}
