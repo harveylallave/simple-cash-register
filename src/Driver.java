@@ -27,12 +27,14 @@ public class Driver {
 			if(strArr[0].equals("show") && validateInput(strArr, 1))
 				displayDenomination();
 
-			else if(strArr[0].equals("put") && validateInput(strArr, DENOMINATION_SIZE + 1))
-				updateDenomination(strArr, true);
-
-			else if(strArr[0].equals("take") && validateInput(strArr, DENOMINATION_SIZE + 1))
-				updateDenomination(strArr, false);
-
+			else if((strArr[0].equals("put") || strArr[0].equals("take")) && 
+					 validateInput(strArr, DENOMINATION_SIZE + 1)) {
+				
+				if(updateDenomination(strArr, strArr[0].equals("put")))
+					 displayDenomination();
+				else System.out.println("Sorry, not enough change.");
+			}
+				
 			else if(strArr[0].equals("change") && validateInput(strArr, 2))
 				getChange(strArr);
 			
@@ -59,20 +61,26 @@ public class Driver {
 		return total;
 	}
 
-	private static void updateDenomination(String[] strArr, boolean add) {
+	private static boolean updateDenomination(String[] strArr, boolean add) {
 		boolean valid = true;
 		if(add)
 			 for(int i = 1; i < DENOMINATION_SIZE + 1; i++)
 				 denomination[i - 1] += Integer.parseInt(strArr[i]);
-		else 
+		else {
+			int[] tempDenomination = new int[DENOMINATION_SIZE];
+			
+			for(int i = 0; i < DENOMINATION_SIZE; i++)
+				tempDenomination[i] = denomination[i];
+			 
 			for(int i = 1; i < DENOMINATION_SIZE + 1; i++)
-				if(Integer.parseInt(strArr[i]) > denomination[i - 1]) {
+				if(Integer.parseInt(strArr[i]) > tempDenomination[i - 1]) {
 					valid = false;
-					System.out.println("Sorry, not enough change.");
 					break;
-				} else denomination[i - 1] -= Integer.parseInt(strArr[i]);
-		
-		if(valid) displayDenomination();
+				} else tempDenomination[i - 1] -= Integer.parseInt(strArr[i]);
+			
+			if(valid) denomination = tempDenomination;
+		}
+		return valid;
 	}
  
 	// Make higher bills more priority
